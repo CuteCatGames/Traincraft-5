@@ -22,12 +22,15 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.Level;
 import train.client.core.handlers.ClientTickHandler;
+import train.client.core.handlers.CustomRenderHandler;
 import train.client.core.handlers.RecipeBookHandler;
 import train.client.core.handlers.TCKeyHandler;
 import train.client.core.helpers.JLayerHook;
 import train.client.gui.*;
 import train.client.render.*;
+import train.client.render.renderSwitch.*;
 import train.common.Traincraft;
+import train.common.adminbook.GUIAdminBook;
 import train.common.api.EntityBogie;
 import train.common.api.EntityRollingStock;
 import train.common.core.CommonProxy;
@@ -41,6 +44,9 @@ import train.common.library.BlockIDs;
 import train.common.library.GuiIDs;
 import train.common.library.Info;
 import train.common.tile.*;
+import train.common.tile.tileSwitch.*;
+import train.common.wellcar.GuiFortyFootContainer;
+import train.common.wellcar.TileFortyFootContainer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -50,21 +56,31 @@ public class ClientProxy extends CommonProxy {
 
 	public static boolean isHoliday() {
 		Calendar cal = Calendar.getInstance();
-		if (cal.get(Calendar.MONTH) == Calendar.DECEMBER
-				&& (cal.get(Calendar.DATE) >= 5 && cal.get(Calendar.DATE) <= 31)) {
-			return true;
-		} else {
-			return false;
-		}
+		return(cal.get(Calendar.MONTH) == Calendar.DECEMBER || (cal.get(Calendar.MONTH) == Calendar.JANUARY) && cal.get(Calendar.DATE) < 7);
+	}
+	public static boolean isPumpkin() {
+		Calendar cal = Calendar.getInstance();
+		return(cal.get(Calendar.MONTH) == Calendar.OCTOBER || cal.get(Calendar.MONTH) == Calendar.NOVEMBER && cal.get(Calendar.DATE) < 15);
 	}
 
 	@Override
-	public void registerEvents(FMLPreInitializationEvent event){
+	public void throwAlphaException() {
+		throw new AlphaExpiredException();
+	}
+
+	@Override
+	public void registerEvents(FMLPreInitializationEvent event) {
 		super.registerEvents(event);
 		ClientTickHandler tickHandler = new ClientTickHandler();
+		CustomRenderHandler renderHandler = new CustomRenderHandler();
 		HUDloco huDloco = new HUDloco();
+		if (Loader.isModLoaded("ComputerCraft")){
+			HUDMTC hudMTC = new HUDMTC();
+			registerEvent(hudMTC);
+		}
 
 		registerEvent(tickHandler);
+		registerEvent(renderHandler);
 		registerEvent(huDloco);
 	}
 
@@ -92,6 +108,12 @@ public class ClientProxy extends CommonProxy {
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(TileLantern.class, new RenderLantern());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.lantern.block), new ItemRenderLantern());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileSwitchStand.class, new RenderSwitchStand());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.switchStand.block), new ItemRenderSwitchStand());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileMFPBWigWag.class, new RenderMFPBWigWag());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.MFPBWigWag.block), new ItemRenderMFPBWigWag());
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(TileWaterWheel.class, new RenderWaterWheel());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.waterWheel.block), new ItemRenderWaterWheel());
@@ -106,6 +128,50 @@ public class ClientProxy extends CommonProxy {
 		
 		ClientRegistry.bindTileEntitySpecialRenderer(TileBridgePillar.class, new RenderBridgePillar());
 		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.bridgePillar.block), new ItemRenderBridgePillar());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileowoYardSwitchStand.class, new RenderowoYardSwtichStand());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.owoYardSwitchStand.block), new ItemRenderowoYardSwitchStand());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileMILWSwitchStand.class, new RenderMILWSwitchStand());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.MILWSwitchStand.block), new ItemRenderMILWSwitchStand());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TilecircleSwitchStand.class, new RendercircleSwitchStand());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.circleSwitchStand.block), new ItemRendercircleSwitchStand());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileowoSwitchStand.class, new RenderowoSwitchStand());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.owoSwitchStand.block), new ItemRenderowoSwitchStand());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileautoSwitchStand.class, new RenderautoSwitchStand());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.autoSwtichStand.block), new ItemRenderautoSwitchStand());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileoverheadWire.class, new RenderoverheadWire());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.overheadWire.block), new ItemRenderoverheadWire());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileoverheadWireDouble.class, new RenderoverheadWireDouble());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.overheadWireDouble.block), new ItemRenderoverheadWireDouble());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TilesignalSpanish.class, new RendersignalSpanish());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.signalSpanish.block), new ItemRendersignalSpanish());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TiletrackConcrete.class, new RendertrackConcrete());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.trackConcrete.block), new ItemRendertrackConcrete());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TilekSignal.class, new RenderkSignal());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.kSignal.block), new ItemRenderkSignal());
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileSpeedSign.class, new RenderSpeedSign());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.speedSign.block), new ItemRenderSpeedSign());
+
+		/*
+		ClientRegistry.bindTileEntitySpecialRenderer(TileFortyFootContainer.class, new FortyFootContainerRender());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.FortyFootContainer.block), new ItemRenderFortyFootContainer());
+		*/
+
+		/*
+		ClientRegistry.bindTileEntitySpecialRenderer(TileFortyFootContainer.class, new FortyFootContainerRender());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockIDs.FortyFootContainer.block), new ItemRenderFortyFootContainer());*/
+
+
 	}
 
 	@Override
@@ -151,6 +217,8 @@ public class ClientProxy extends CommonProxy {
 			return riddenByEntity != null ? new GuiZepp(riddenByEntity.inventory, entity) : null;
 		case (GuiIDs.DIGGER):
 			return riddenByEntity != null ? new GuiBuilder(player, riddenByEntity.inventory, entity) : null;
+		case (GuiIDs.MTC_INFO):
+			return riddenByEntity != null && Loader.isModLoaded("ComputerCraft") ? new GuiMTCInfo(player) : null;
 
 			//Stationary entities while player is not riding. 
 		case (GuiIDs.FREIGHT):
@@ -169,6 +237,9 @@ public class ClientProxy extends CommonProxy {
 			return new GuiLantern(player, (TileLantern)te);
 		case (GuiIDs.JUKEBOX):
 			return entity1 != null ? new GuiJukebox(player,(EntityJukeBoxCart)entity1) : null;
+		case (GuiIDs.FORTY_FOOT_CONTAINER):
+			return new GuiFortyFootContainer((TileFortyFootContainer)te, player);
+
 		default:
 			return null;
 		}
@@ -237,6 +308,11 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public float getJukeboxVolume() {
 		return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS) * Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.MASTER);
+	}
+
+	@Override
+	public void openadmingui(String data){
+		Minecraft.getMinecraft().displayGuiScreen(new GUIAdminBook(data));
 	}
 
 	@Override

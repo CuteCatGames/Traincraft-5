@@ -26,7 +26,6 @@ public class EntityTenderGS4 extends Tender implements IInventory {
 		freightInventorySize = 16;
 		tenderItems = new ItemStack[freightInventorySize];
 		this.setDefaultMass(0.2);
-		this.acceptedColors.add(this.getColorFromString("Black"));
 	}
 
 	public EntityTenderGS4(World world, double d, double d1, double d2) {
@@ -84,7 +83,7 @@ public class EntityTenderGS4 extends Tender implements IInventory {
 	}
 	@Override
 	public String getInventoryName() {
-		return "Tender";
+		return "GS4 Tender";
 	}
 
 	@Override
@@ -106,7 +105,7 @@ public class EntityTenderGS4 extends Tender implements IInventory {
 
 	@Override
 	public float getOptimalDistance(EntityMinecart cart) {
-		return 2.25F;
+		return 2.1F;
 	}
 
 	@Override

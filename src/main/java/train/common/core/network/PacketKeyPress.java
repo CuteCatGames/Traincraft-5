@@ -24,6 +24,7 @@ import train.common.entity.zeppelin.AbstractZeppelin;
  * 		2 = X<br>
  * 		3 = D<br>
  * 		6 = C<br>
+ * 		10 = B<br>
  */
 public class PacketKeyPress implements IMessage {
 
@@ -77,6 +78,12 @@ public class PacketKeyPress implements IMessage {
 				}
 			}
 
+			/*if (message.key == 404){
+				CommonProxy.debug = CommonProxy.debug;
+				if (Minecraft.getMinecraft().theWorld != null) {
+					System.out.println(Minecraft.getMinecraft().theWorld.isRemote);
+				}
+			}*/
 			return null;
 		}
 	}

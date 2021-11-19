@@ -4,10 +4,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.*;
+import train.common.adminbook.ServerLogger;
+import train.common.entity.rollingStock.EntityTankLava;
 
 import javax.annotation.Nullable;
 
@@ -16,6 +20,7 @@ public class LiquidTank extends EntityRollingStock implements IFluidHandler, ISi
 	protected ItemStack cargoItems[];
 	private int update = 8;
 	private FluidTank theTank;
+	public TileEntity[] blocksToCheck;
 
 	/**
 	 * 
@@ -71,13 +76,41 @@ public class LiquidTank extends EntityRollingStock implements IFluidHandler, ISi
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if (worldObj.isRemote)
-			return;
+		if (worldObj.isRemote){ return;}
+
+		if(ticksExisted%5==0 && fill(ForgeDirection.UNKNOWN, new FluidStack(FluidRegistry.WATER,100), false)==100) {
+			FluidStack drain = null;
+			blocksToCheck = new TileEntity[]{worldObj.getTileEntity(MathHelper.floor_double(posX), MathHelper.floor_double(posY - 1), MathHelper.floor_double(posZ)),
+					worldObj.getTileEntity(MathHelper.floor_double(posX), MathHelper.floor_double(posY + 2), MathHelper.floor_double(posZ)),
+					worldObj.getTileEntity(MathHelper.floor_double(posX), MathHelper.floor_double(posY + 3), MathHelper.floor_double(posZ)),
+					worldObj.getTileEntity(MathHelper.floor_double(posX), MathHelper.floor_double(posY + 4), MathHelper.floor_double(posZ))
+			};
+
+			for (TileEntity block : blocksToCheck) {
+				if (drain == null && block instanceof IFluidHandler) {
+					for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
+						if (((IFluidHandler) block).drain(direction, 100, false) != null &&
+								((IFluidHandler) block).drain(direction, 100, false).fluid == FluidRegistry.WATER &&
+								((IFluidHandler) block).drain(direction, 100, false).amount == 100
+						) {
+							drain = ((IFluidHandler) block).drain(
+									direction, 100, true);
+						}
+					}
+				}
+			}
+
+			if (drain != null) {
+				fill(ForgeDirection.UNKNOWN, drain, true);
+			}
+		}
+
+
 		if (theTank != null && theTank.getFluid() != null) {
 			this.dataWatcher.updateObject(18, theTank.getFluid().amount);
 			this.dataWatcher.updateObject(4, theTank.getFluid().getFluidID());
 			if (theTank.getFluid().getFluid() != null)
-				this.dataWatcher.updateObject(22, theTank.getFluid().getFluid().getName());
+				this.dataWatcher.updateObject(22, theTank.getFluid().getFluid().getUnlocalizedName());
 			handleMass();
 		}
 		else if (theTank != null && theTank.getFluid() == null) {
@@ -107,19 +140,36 @@ public class LiquidTank extends EntityRollingStock implements IFluidHandler, ISi
 		if (this.update % 8 == 0 && itemstack != null) {
 			ItemStack emptyItem = itemstack.getItem().getContainerItem(itemstack);
 			if(cargoItems[1] == null) {
-				result = LiquidManager.getInstance().processContainer(this, 0, theTank, itemstack);
-			}
-			else if(emptyItem != null) {
+				if (theTank.getFluidAmount() == 0) {
+					for (Fluid fluid : FluidRegistry.getRegisteredFluids().values()) {
+						if (LiquidManager.getInstance().containsFluid(itemstack,
+								FluidRegistry.getFluidStack(FluidRegistry.getFluidName(fluid), 0))) {
+							if (fluid.getTemperature() < 1000) {
+								if (!(this instanceof EntityTankLava)) {
+									result = LiquidManager.getInstance().processContainer(this, 0, this, itemstack);
+									break;
+								}
+							} else {
+								if (this instanceof EntityTankLava) {
+									result = LiquidManager.getInstance().processContainer(this, 0, this, itemstack);
+									break;
+								}
+							}
+						}
+					}
+				} else {
+					result = LiquidManager.getInstance().processContainer(this, 0, this, itemstack);
+				}
+			} else if (emptyItem != null) {
 				if(emptyItem.getItem() == cargoItems[1].getItem()) {
-    				if(cargoItems[1].stackSize+1 < cargoItems[1].getMaxStackSize()) {
-    					result = LiquidManager.getInstance().processContainer(this, 0, theTank, itemstack);
+    				if(cargoItems[1].stackSize+1 <= cargoItems[1].getMaxStackSize()) {
+    					result = LiquidManager.getInstance().processContainer(this, 0, this, itemstack);
     				}
 				}
-			}
-			else {
+			} else {
 				if(itemstack.getItem() == cargoItems[1].getItem()) {
     				if(cargoItems[1].stackSize+1 <= cargoItems[1].getMaxStackSize()) {
-    					result = LiquidManager.getInstance().processContainer(this, 0, theTank, itemstack);
+    					result = LiquidManager.getInstance().processContainer(this, 0, this, itemstack);
     				}
 				}
 			}
@@ -314,6 +364,7 @@ public class LiquidTank extends EntityRollingStock implements IFluidHandler, ISi
 				riddenByEntity.mountEntity(this);
 			}
 			this.setDead();
+			ServerLogger.deleteWagon(this);
 			if (damagesource.getEntity() instanceof EntityPlayer) {
 				dropCartAsItem(((EntityPlayer)damagesource.getEntity()).capabilities.isCreativeMode);
 			}

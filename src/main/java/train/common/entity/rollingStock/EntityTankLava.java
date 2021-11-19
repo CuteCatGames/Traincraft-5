@@ -7,9 +7,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fluids.FluidRegistry;
 import train.common.Traincraft;
 import train.common.api.LiquidTank;
+import train.common.core.util.TraincraftUtil;
 import train.common.library.EnumTrains;
 import train.common.library.GuiIDs;
 
@@ -17,7 +17,7 @@ public class EntityTankLava extends LiquidTank {
 	public int freightInventorySize;
 
 	public EntityTankLava(World world) {
-		super(world, FluidRegistry.LAVA, 0, EnumTrains.tankCartLava.getTankCapacity());
+		super(world, EnumTrains.tankCartLava.getTankCapacity());
 		initFreightWater();
 	}
 
@@ -28,7 +28,7 @@ public class EntityTankLava extends LiquidTank {
 
 	public EntityTankLava(World world, double d, double d1, double d2) {
 		this(world);
-		setPosition(d, d1 + (double) yOffset, d2);
+		setPosition(d, d1 + yOffset, d2);
 		motionX = 0.0D;
 		motionY = 0.0D;
 		motionZ = 0.0D;
@@ -50,9 +50,9 @@ public class EntityTankLava extends LiquidTank {
 		if (worldObj.isRemote)
 			return;
 		if (getAmount() > 0)
-			setColor(getColorFromString("Full"));
+			setColor(TraincraftUtil.getByteFromColor("Full"));
 		if (getAmount() <= 0)
-			setColor(getColorFromString("Empty"));
+			setColor(TraincraftUtil.getByteFromColor("Empty"));
 	}
 	
 	@Override

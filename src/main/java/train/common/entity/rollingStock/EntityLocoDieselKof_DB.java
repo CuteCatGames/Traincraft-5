@@ -22,11 +22,6 @@ public class EntityLocoDieselKof_DB extends DieselTrain {
 	public void initLoco() {
 		fuelTrain = 0;
 		locoInvent = new ItemStack[inventorySize];
-		this.acceptedColors.add(this.getColorFromString("Red"));
-		this.acceptedColors.add(this.getColorFromString("Green"));
-		this.acceptedColors.add(this.getColorFromString("Yellow"));
-		this.acceptedColors.add(this.getColorFromString("Black"));
-		this.acceptedColors.add(this.getColorFromString("Blue"));
 	}
 
 	public EntityLocoDieselKof_DB(World world, double d, double d1, double d2) {
@@ -42,6 +37,7 @@ public class EntityLocoDieselKof_DB extends DieselTrain {
 
 	@Override
 	public void updateRiderPosition() {
+		if(riddenByEntity==null){return;}
 		riddenByEntity.setPosition(posX, posY + getMountedYOffset() + riddenByEntity.getYOffset() - 0.1F, posZ);
 	}
 	

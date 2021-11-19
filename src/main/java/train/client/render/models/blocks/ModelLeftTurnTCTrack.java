@@ -16,11 +16,15 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 	private IModelCustom modelMediumLeftTurn;
 	private IModelCustom modelLargeLeftTurn;
 	private IModelCustom modelVeryLargeLeftTurn;
+	private IModelCustom modelSuperLargeLeftTurn;
+	private IModelCustom modelConcreteSuperLargeLeftTurn;
 
 	public ModelLeftTurnTCTrack() {
 		modelMediumLeftTurn = AdvancedModelLoader.loadModel(new ResourceLocation(Info.modelPrefix + "track_curve_medium.obj"));
 		modelLargeLeftTurn = AdvancedModelLoader.loadModel(new ResourceLocation(Info.modelPrefix + "track_curve_big.obj"));
 		modelVeryLargeLeftTurn = AdvancedModelLoader.loadModel(new ResourceLocation(Info.modelPrefix + "track_curve_very_big.obj"));
+		modelSuperLargeLeftTurn = AdvancedModelLoader.loadModel(new ResourceLocation(Info.modelPrefix + "track_curve_super_big_left.obj"));
+		modelConcreteSuperLargeLeftTurn = AdvancedModelLoader.loadModel(new ResourceLocation(Info.modelPrefix + "track_concrete_super_large_left_turn.obj"));
 	}
 
 	public void renderMedium() {
@@ -32,8 +36,15 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 	public void renderVeryLarge() {
 		modelVeryLargeLeftTurn.renderAll();
 	}
+	public void renderSuperLarge() { modelSuperLargeLeftTurn.renderAll();}
+	public void renderConcreteSuperLarge() {modelConcreteSuperLargeLeftTurn.renderAll();}
 
 	public void render(String type, TileTCRail tcRail, double x, double y, double z) {
+		int facing = tcRail.getWorldObj().getBlockMetadata(tcRail.xCoord, tcRail.yCoord, tcRail.zCoord);
+		render( type, facing, x, y, z, 1, 1, 1, 1);
+	}
+
+	public void render(String type, int facing, double x, double y, double z, float r, float g, float b, float a) {
 		// Push a blank matrix onto the stack
 		GL11.glPushMatrix();
 
@@ -42,9 +53,8 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 
 		// Bind the texture, so that OpenGL properly textures our block.
 		FMLClientHandler.instance().getClient().renderEngine.bindTexture(new ResourceLocation(Info.resourceLocation, Info.modelTexPrefix + "track_normal.png"));
-		GL11.glColor3f(1, 1, 1);
+		GL11.glColor4f(r, g, b, a);
 		//GL11.glScalef(0.5f, 0.5f, 0.5f);
-		int facing = tcRail.getWorldObj().getBlockMetadata(tcRail.xCoord, tcRail.yCoord, tcRail.zCoord);
 
 		if (facing == 3) {
 			GL11.glRotatef(-90, 0, 1, 0);
@@ -54,6 +64,10 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 				GL11.glTranslatef(-10.0f, 0.0f, 2.0f);
 			if(type.equals("medium"))
 				GL11.glTranslatef(-8.0f, 0.0f, 2.0f);
+			if (type.equals("super_large"))
+				GL11.glTranslatef(-5.5f,0f,1.5f);
+			if (type.equals("concrete_super_large"))
+				GL11.glTranslatef(-5.5f,0f,1.5f);
 		}
 		if (facing == 1) {
 			GL11.glRotatef(90, 0, 1, 0);
@@ -63,6 +77,10 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 				GL11.glTranslatef(0.0f, 0.0f, 0.0f);
 			if(type.equals("medium"))
 				GL11.glTranslatef(2.0f, 0.0f, 0.0f);
+			if (type.equals("super_large"))
+				GL11.glTranslatef(4.5f,0f,-0.5f);
+			if (type.equals("concrete_super_large"))
+				GL11.glTranslatef(4.5f,0f,-0.5f);
 		}
 		if(facing == 2){
 			if(type.equals("very_large"))
@@ -71,6 +89,10 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 				GL11.glTranslatef(-6.0f, 0.0f, -4.0f);
 			if(type.equals("medium"))
 				GL11.glTranslatef(-4.0f, 0.0f, -4.0f);
+			if (type.equals("super_large"))
+				GL11.glTranslatef(-1.5f,0f,-4.5f);
+			if (type.equals("concrete_super_large"))
+				GL11.glTranslatef(-1.5f,0f,-4.5f);
 		}
 		if(facing == 0){
 			GL11.glRotatef(180, 0, 1, 0);
@@ -80,11 +102,17 @@ public class ModelLeftTurnTCTrack extends ModelBase {
 				GL11.glTranslatef(-4.0f, 0.0f, 6.0f);
 			if(type.equals("medium"))
 				GL11.glTranslatef(-2.0f, 0.0f, 6.0f);
+			if (type.equals("super_large"))
+				GL11.glTranslatef(0.5f,0f,5.5f);
+			if (type.equals("concrete_super_large"))
+				GL11.glTranslatef(0.5f,0f,5.5f);
 		}
 
 		if(type.equals("medium"))this.renderMedium();
 		if(type.equals("large"))this.renderLarge();
 		if(type.equals("very_large"))this.renderVeryLarge();
+		if(type.equals("super_large"))this.renderSuperLarge();
+		if(type.equals("concrete_super_large"))this.renderConcreteSuperLarge();
 
 		// Pop this matrix from the stack.
 		GL11.glPopMatrix();

@@ -10,6 +10,7 @@ package train.common.library;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemBlock;
 import train.common.items.*;
+import train.common.wellcar.ItemFortyFootContainer;
 
 public enum BlockIDs {
 
@@ -31,17 +32,42 @@ public enum BlockIDs {
 	openFurnaceActive(false, null),
 	oreTC(true, ItemBlockOreTC.class),
 	lantern(false, null),
+	switchStand(false, null),
+	MFPBWigWag(false, null),
 	waterWheel(true, ItemBlockGeneratorWaterWheel.class),
 	windMill(true, ItemBlockGeneratorWindMill.class),
 	generatorDiesel(true, ItemBlockGeneratorDiesel.class),
-	
+	mtcTransmitterSpeed(false, null),
+	mtcTransmitterMTC(false, null),
+	mtcATOStopTransmitter(false, null),
+	mtcReceiverMTC(false, null),
+	mtcReceiverDestination(false, null),
+	pdmInstructionBlock(false, null),
 	//Liquids
 	diesel(false, ItemBlockFluid.class),
 	refinedFuel(false, ItemBlockFluid.class),
 	
 	tcRailGag(false,null),
 	tcRail(false,null),
-	bridgePillar(false,null);
+	bridgePillar(false,null),
+
+	MILWSwitchStand(false, null),
+	autoSwtichStand(false, null),
+	owoSwitchStand(true,ItemBlockOWOSwitchStand.class),
+	circleSwitchStand(false,null),
+	owoYardSwitchStand(true,ItemBlockOWOYardSwitch.class),
+	overheadWire(false,null),
+	overheadWireDouble(false,null),
+	poweredGravel(false,null),
+	snowGravel(false,null),
+	signalSpanish(false,null),//ItemsignalSpanish.class
+	trackConcrete(false,null),
+	kSignal(false,null),
+	FortyFootContainer(true, ItemFortyFootContainer.class),
+	speedSign(false, null),
+	dirtyBallast(false,null),
+	dirtierBallast(false,null),
+	;
 
 	public Block block;
 	public boolean hasItemBlock;
